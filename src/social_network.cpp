@@ -109,11 +109,48 @@ User* get_user_by_id(int target_id, int arr_size, User* users_array){
 }
 //función para buscar un usuario basado en su id
 
-void make_matrix(){
-    // le mandamos una matriz
-    // llena todas las celdas con false
-}
+bool** make_matrix(int m_users){
+    //recibe el número de usuarios
 
+    bool** users_matrix = new bool*[m_users];
+    // creamos la matriz
+
+    for (int i = 0; i < m_users; ++i) {
+        users_matrix[i] = new bool[m_users];
+    }
+
+    for (int i = 0; i < m_users; i++)
+    {
+        for (int j = 0; j < m_users; j++)
+        {
+            users_matrix[i][j] = false;
+        }
+    }
+    // llena todas las celdas con false
+    
+    return users_matrix;
+}
+//función que retorna la matriz de usuarios x usuarios
+
+
+void delete_matrix(bool** users_matrix, int m_users){
+        int w = 0;
+        while(w < m_users){
+            delete[] users_matrix[w]; 
+            w++;
+        }
+        delete[] users_matrix;
+}
+//Elimina la matriz dinámica
+
+
+
+void make_connections(){
+    // aquí se crean las comunidades y las amistades
+    // se lee el arreglo de usuarios, se crea una comunidad con dicho usuario
+    // se manda el arreglo y la matriz a una función recursiva que irá hilando las comunidades hasta que ya no hayan miembros de esa comunidad por marcar
+    // se recorre la matriz y por cada TRUE se vuelve a llamar a la función 
+}
 
 void get_data(){
     //recibimos datos de consola
@@ -135,20 +172,57 @@ void get_data(){
         cin >> m_users;
         cin >> n_edges;
     
+        bool** users_matrix = make_matrix(m_users);
+
+
+        cout << "edges: "<< n_edges << endl;
+
+        int friendships[n_edges][2];    
+        //arreglo fijo del tamaño de la cantidad de arcos en el grafo
+
+        // int number_edges = 0;
+        // while(number_edges < n_edges){
+        //     int p = 0;
+        //     int q = 0;
+        //     cin >> p;
+        //     cin >> q;
+        //     friendships[0][number_edges] = p;
+        //     friendships[1][number_edges] = q;
+            
+        //     number_edges++;
+        // }
+    
+        // int f = 0;
+        // while(f < n_edges){
+        //     cout << friendships[0][n_edges] << " " << friendships[1][n_edges];
+        //     cout << endl;
+        //     f++;
+        // }
+
+    
+    
+    
+    
+    
+    
+        // int f = 0;
+        // while(f < m_users){
+        //     int g = 0;
+        //     while(g < m_users){
+        //         if(!users_matrix[f][g]) cout << "No connection ";
+        //         g++;
+        //     }
+        //     cout << endl;
+        //     f++;
+        // }
+
+
+        delete_matrix(users_matrix, m_users);
 
         i++;
     }
 
 }
-
-void make_connections(){
-    // aquí se crean las comunidades y las amistades
-    // se lee el arreglo de usuarios, se crea una comunidad con dicho usuario
-    // se manda el arreglo y la matriz a una función recursiva que irá hilando las comunidades hasta que ya no hayan miembros de esa comunidad por marcar
-    // se recorre la matriz y por cada TRUE se vuelve a llamar a la función 
-}
-
-
 
 
 int main(){
