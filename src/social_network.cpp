@@ -22,6 +22,7 @@ public:
 
 class Community {
 public:
+    int number_of_communities;
     int number_of_members;
     int community_id;
     bool is_empty;
@@ -30,6 +31,7 @@ public:
     Community* following;
 
     Community(){
+        this->number_of_communities = 0;
         this->number_of_members = 0;
         this->community_id = 0;
         this->is_empty = true;
@@ -41,9 +43,12 @@ public:
     //inicialmente nuestra comunidad no tiene usuarios, está vacía, y no tiene comunidades siguientes
 
     void append_user(User* user){
-        
+
+        this->number_of_members++;
+
         if(first == nullptr){
             first = user;
+            cout << "user added " << endl;
             return;
         } 
         // si la lista está vacía el primer usuario es el nodo cabecera de la lista
@@ -56,11 +61,12 @@ public:
         // moviéndonos a través de la lista
 
         last->next = user;
+        cout << "user added " << endl;
         // enlistar el nuevo usuario al final de la lista
     }
 
-    void print_list(){
-        User* u = first;
+    void print_list(Community* c){
+        User* u = c->first;
         while(u != nullptr){
             cout << u->id << endl;
             u = u->next;
@@ -68,8 +74,12 @@ public:
     } // MODIFICAR PARA ESCRIBIR EN ARCHIVO
 
     void append_community(Community* community){
+        
+        this->number_of_communities++;
+
         if(start == nullptr){
             start = community;
+            cout << "community added " << endl;
             return;
         }
         // si la lista de comunidades está vacía la primera apuntará a la nueva comunidad que estemos incluyendo
@@ -87,7 +97,8 @@ public:
     void print_communities(){
         Community* c = start;
         while(c != nullptr){
-            cout << "Comunidad " << c->community_id << ":" << endl;
+            cout << "Comunidad " << c->community_id + 1 << ":" << endl;
+            print_list(c);
             c = c->following;
         } //MODIFICAR PARA ESCRIBIR EN ARCHIVO
     }
@@ -132,6 +143,25 @@ bool** make_matrix(int m_users){
 }
 //función que retorna la matriz de usuarios x usuarios
 
+User* make_users_array(int number_users){
+    User* users_array = new User[number_users];
+    
+    int i = 0;
+    while(i < number_users){
+        User u;
+        users_array[i] = u;
+        i++;
+    }
+
+    i = 0;
+    while(i < number_users){
+        users_array[i].id = i;
+        i++;
+    }
+
+    return users_array;
+}
+//función que crea el arreglo de usuarios
 
 void delete_matrix(bool** users_matrix, int m_users){
         int w = 0;
@@ -143,24 +173,52 @@ void delete_matrix(bool** users_matrix, int m_users){
 }
 //Elimina la matriz dinámica
 
+void make_connections(User* user, bool** users_matrix, User* users_array, int m_users, Community* community)
+{
+    int i = 0;
 
+    while(i < m_users){
+        if(users_matrix[user->id][i]){
 
-void make_connections(){
-    // aquí se crean las comunidades y las amistades
-    // se lee el arreglo de usuarios, se crea una comunidad con dicho usuario
-    // se manda el arreglo y la matriz a una función recursiva que irá hilando las comunidades hasta que ya no hayan miembros de esa comunidad por marcar
-    // se recorre la matriz y por cada TRUE se vuelve a llamar a la función 
+            if(!(get_user_by_id(i, m_users, users_array)->visited && get_user_by_id(i, m_users, users_array)->is_in_community)){
+                User* some_friend = get_user_by_id(i, m_users, users_array);
+                
+                some_friend->visited = true;
+                some_friend->is_in_community = true;
+
+                community->append_user(some_friend);
+
+                make_connections(some_friend, users_matrix, users_array, m_users, community);
+            }
+
+        }
+
+        i++;
+    }
+} 
+//función de backtracking. Recorremos el arbol de amistades en DFS
+
+void printing(int case_counter, Community* communities_list){
+    int i = 0;
+    while(i < case_counter){
+        cout << "Caso " << i + 1 << ": " << endl;
+        communities_list->print_communities();
+        i++;
+    }
+}
+// función para escribir en consola
+
+void delete_communities(Community* communities_list){
+
+        Community* c = communities_list->start;
+        while(c != nullptr){
+            Community* cmm = c->following;
+            delete c;
+            c = cmm;
+        }
 }
 
 void get_data(){
-    //recibimos datos de consola
-    // al llegar a los usuarios creamos una matriz usuarios x usuarios y un arreglo de usuarios donde se inicializan todos
-    // llenamos las celdas de la matriz con false
-    //  guardamos las amistades en una matriz de 2 x amistades
-    // leemos cada doble celda de la matriz de amistades y con esos valores marcamos true en la intersección de las celdas de la matriz de usuarios x usuarios
-    
-
-    //mandamos la lista de usuarios y la matriz a una función
 
     int c_cases = 0;
     int m_users = 0;
@@ -172,53 +230,62 @@ void get_data(){
         cin >> m_users;
         cin >> n_edges;
     
-        bool** users_matrix = make_matrix(m_users);
+        bool** users_matrix = make_matrix(m_users); //matriz de usuarios x usuarios → sabemos quien tiene amistad con quien
+
+        User* users_array = make_users_array(m_users); 
+        //arreglo de usuarios → sirve para ir marcando
+
+        Community* communities_list = new Community();
+        //lista de comunidades
+
+        int j = 0;
+        while(j < n_edges){
+            int p = 0;
+            int q = 0;
+            cin >> p;
+            cin >> q;
+
+            users_matrix[p][q] = true;
+            users_matrix[q][p] = true;
+
+            j++;
+        }
+
+        int community_counter = 0;
+
+        int w = 0;
+        while(w < m_users){
+
+            if(!(users_array[w].is_in_community && users_array[w].visited))
+            {
+                users_array[w].is_in_community  = true;
+                users_array[w].visited = true;
+                User* present_user = &users_array[w];
 
 
-        cout << "edges: "<< n_edges << endl;
+                Community* com = new Community();
+                
+                com->community_id = community_counter;
 
-        int friendships[n_edges][2];    
-        //arreglo fijo del tamaño de la cantidad de arcos en el grafo
+                community_counter++;
 
-        // int number_edges = 0;
-        // while(number_edges < n_edges){
-        //     int p = 0;
-        //     int q = 0;
-        //     cin >> p;
-        //     cin >> q;
-        //     friendships[0][number_edges] = p;
-        //     friendships[1][number_edges] = q;
+                com->append_user(present_user);
+
+                communities_list->append_community(com);
             
-        //     number_edges++;
-        // }
-    
-        // int f = 0;
-        // while(f < n_edges){
-        //     cout << friendships[0][n_edges] << " " << friendships[1][n_edges];
-        //     cout << endl;
-        //     f++;
-        // }
+                make_connections(present_user, users_matrix, users_array, m_users, com);
+            }
 
+            w++;
+        }
     
     
-    
-    
-    
-    
-        // int f = 0;
-        // while(f < m_users){
-        //     int g = 0;
-        //     while(g < m_users){
-        //         if(!users_matrix[f][g]) cout << "No connection ";
-        //         g++;
-        //     }
-        //     cout << endl;
-        //     f++;
-        // }
+        printing(i + 1, communities_list);
 
 
         delete_matrix(users_matrix, m_users);
-
+        delete[] users_array;
+        delete_communities(communities_list);
         i++;
     }
 
