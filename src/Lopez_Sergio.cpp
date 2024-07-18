@@ -234,7 +234,7 @@ void printing(Community* communities_list, int &this_case){
     fstream output_file;
 
     // Abre el archivo en modo lectura y escritura, y lo crea si no existe
-    output_file.open("Lopez_Sergio.txt", ios::out | ios::app);
+    output_file.open("Sergio_Lopez.txt", ios::out | ios::app);
 
     if (!output_file) {
         cout << "No se pudo abrir el archivo" << endl;
