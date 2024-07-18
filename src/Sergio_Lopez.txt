@@ -1,0 +1,28 @@
+Caso 1: 
+Comunidad 1:
+0
+1
+2
+3
+4
+
+Caso 2: 
+Comunidad 1:
+0
+1
+2
+3
+
+Comunidad 2:
+4
+5
+6
+7
+
+Comunidad 3:
+8
+9
+
+Comunidad 4:
+10
+

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+
 
 using namespace std;
 
@@ -48,7 +50,6 @@ public:
 
         if(first == nullptr){
             first = user;
-            cout << "user added " << endl;
             return;
         } 
         // si la lista está vacía el primer usuario es el nodo cabecera de la lista
@@ -61,17 +62,9 @@ public:
         // moviéndonos a través de la lista
 
         last->next = user;
-        cout << "user added " << endl;
         // enlistar el nuevo usuario al final de la lista
     }
 
-    void print_list(Community* c){
-        User* u = c->first;
-        while(u != nullptr){
-            cout << u->id << endl;
-            u = u->next;
-        }
-    } // MODIFICAR PARA ESCRIBIR EN ARCHIVO
 
     void append_community(Community* community){
         
@@ -79,7 +72,6 @@ public:
 
         if(start == nullptr){
             start = community;
-            cout << "community added " << endl;
             return;
         }
         // si la lista de comunidades está vacía la primera apuntará a la nueva comunidad que estemos incluyendo
@@ -93,15 +85,54 @@ public:
 
         //agregando una nueva comunidad si la lista de comunidades no está vacía
     }
+    
+    void print_list(Community* c, fstream &file_to_write){
+        User* u = c->first;
+        while(u != nullptr){
+            file_to_write << u->id << endl;
+            u = u->next;
+        }
+        file_to_write << endl;
+    } // MODIFICAR PARA ESCRIBIR EN ARCHIVO
 
-    void print_communities(){
+    void print_communities(fstream &file_to_write_on){
+
         Community* c = start;
         while(c != nullptr){
-            cout << "Comunidad " << c->community_id + 1 << ":" << endl;
-            print_list(c);
+            sortLinkedList(c->first); // ordenamos la lista
+
+            file_to_write_on << "Comunidad " << c->community_id + 1 << ":" << endl;
+            print_list(c, file_to_write_on);
             c = c->following;
         } //MODIFICAR PARA ESCRIBIR EN ARCHIVO
     }
+
+    void sortLinkedList(User* head) {
+        bool swapped;
+        User* ptr;
+        User* last = nullptr;
+
+        /* Bubble Sort */
+        do {
+            swapped = false;
+            ptr = head;
+
+            while (ptr->next != last) {
+                if (ptr->id > ptr->next->id) {
+    
+                    int temp = ptr->id;
+                    ptr->id = ptr->next->id;
+                    ptr->next->id = temp;
+                    swapped = true;
+                } //estamos intercambiando id's no los elementos en sí
+
+                ptr = ptr->next;
+            }
+            last = ptr;
+        } while (swapped);
+    } 
+    // función que ordena la lista simplemente enlazada
+
 };
 // clase de comunidad y lista de comunidades a su vez. 
 
@@ -198,13 +229,24 @@ void make_connections(User* user, bool** users_matrix, User* users_array, int m_
 } 
 //función de backtracking. Recorremos el arbol de amistades en DFS
 
-void printing(int case_counter, Community* communities_list){
-    int i = 0;
-    while(i < case_counter){
-        cout << "Caso " << i + 1 << ": " << endl;
-        communities_list->print_communities();
-        i++;
+void printing(Community* communities_list, int &this_case){
+
+    fstream output_file;
+
+    // Abre el archivo en modo lectura y escritura, y lo crea si no existe
+    output_file.open("Sergio_Lopez.txt", ios::out | ios::app);
+
+    if (!output_file) {
+        cout << "No se pudo abrir el archivo" << endl;
+        return;
     }
+    
+    output_file << "Caso " << this_case + 1 << ": " << endl;
+    communities_list->print_communities(output_file);
+
+    this_case++;
+
+    output_file.close();
 }
 // función para escribir en consola
 
@@ -217,6 +259,26 @@ void delete_communities(Community* communities_list){
             c = cmm;
         }
 }
+// función para eliminar las comunidades
+
+void read_output_file(){
+    fstream file_to_read;
+
+    file_to_read.open("Sergio_Lopez.txt", ios::in);
+
+    if(!file_to_read){
+        cout << "No se pudo abrir el archivo" << endl;
+        return;
+    }
+
+    string line;
+    while (getline(file_to_read, line)) {
+        cout << line << endl;
+    }
+
+    file_to_read.close();
+}
+// leer el archivo generado en consola
 
 void get_data(){
 
@@ -279,9 +341,9 @@ void get_data(){
             w++;
         }
     
-    
-        printing(i + 1, communities_list);
+        int current_case_counter = i;
 
+        printing(communities_list, current_case_counter);
 
         delete_matrix(users_matrix, m_users);
         delete[] users_array;
@@ -289,7 +351,9 @@ void get_data(){
         i++;
     }
 
+    read_output_file();
 }
+// función para obtener datos, crear matriz booleana de usuarios x usuarios, arreglo de usuarios y comunidades 
 
 
 int main(){
